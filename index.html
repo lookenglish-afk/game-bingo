@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classic English Number Bingo (1 - 75)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@700;800;900&family=Chongo&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --col-b: #ef4444; /* Đỏ */
+      --col-i: #f59e0b; /* Vàng cam */
+      --col-n: #10b981; /* Xanh lá */
+      --col-g: #06b6d4; /* Xanh biển */
+      --col-o: #8b5cf6; /* Tím */
+      --bg-dark: #0f172a;
+      --bg-panel: #1e293b;
+      --text-light: #f8fafc;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: radial-gradient(circle at top, #1e1b4b, #090d16 85%);
+      color: var(--text-light);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .bingo-letters {
+      display: flex;
+      gap: 4px;
+      font-family: 'Fredoka', cursive;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .b-letter {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    .b-b { background: var(--col-b); }
+    .b-i { background: var(--col-i); }
+    .b-n { background: var(--col-n); }
+    .b-g { background: var(--col-g); }
+    .b-o { background: var(--col-o); }
+
+    .brand-title {
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      color: #38bdf8;
+    }
+
+    .tab-group {
+      display: flex;
+      background: rgba(30, 41, 59, 0.8);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      gap: 4px;
+    }
+
+    .tab-btn {
+      padding: 8px 18px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    }
+
+    main {
+      flex: 1;
+      padding: 20px;
+      max-width: 1350px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .view-section {
+      display: none;
+    }
+
+    .view-section.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* HOST CALLER STYLES */
+    .host-layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 992px) {
+      .host-layout { grid-template-columns: 1fr; }
+    }
+
+    .caller-panel {
+      background: rgba(30, 41, 59, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .ball-display {
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #ffffff 0%, #cbd5e1 30%, #475569 90%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 20px 0;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 -10px 20px rgba(0, 0, 0, 0.4);
+      border: 4px solid #64748b;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .ball-display.spinning {
+      animation: ballSpin 0.15s infinite linear;
+    }
+
+    @keyframes ballSpin {
+      0% { transform: rotate(0deg) scale(0.98); }
+      50% { transform: rotate(180deg) scale(1.02); }
+      100% { transform: rotate(360deg) scale(0.98); }
+    }
+
+    .ball-letter {
+      font-family: 'Fredoka', cursive;
+      font-size: 38px;
+      font-weight: 700;
+      line-height: 1;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .ball-number {
+      font-family: 'Fredoka', cursive;
+      font-size: 78px;
+      font-weight: 700;
+      line-height: 0.95;
+      color: #0f172a;
+    }
+
+    .ball-letter.b { color: var(--col-b); }
+    .ball-letter.i { color: var(--col-i); }
+    .ball-letter.n { color: var(--col-n); }
+    .ball-letter.g { color: var(--col-g); }
+    .ball-letter.o { color: var(--col-o); }
+
+    .control-btn {
+      width: 100%;
+      padding: 16px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 900;
+      font-size: 19px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.2s ease;
+      margin-bottom: 12px;
+    }
+
+    .btn-call {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+    .btn-call:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5); }
+    .btn-call:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .btn-speak {
+      background: #3b82f6;
+      color: white;
+    }
+    .btn-speak:hover { background: #2563eb; }
+
+    .btn-secondary {
+      background: #334155;
+      color: #f8fafc;
+      font-size: 15px;
+      padding: 10px;
+    }
+    .btn-secondary:hover { background: #475569; }
+
+    /* MASTER BOARD */
+    .board-panel {
+      background: rgba(30, 41, 59, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 24px;
+    }
+
+    .board-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .board-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .letter-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .row-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Fredoka', cursive;
+      font-size: 26px;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .row-numbers {
+      display: grid;
+      grid-template-columns: repeat(15, 1fr);
+      gap: 6px;
+      flex: 1;
+    }
+
+    .num-slot {
+      aspect-ratio: 1;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 14px;
+      color: #475569;
+      transition: all 0.3s ease;
+    }
+
+    .num-slot.called {
+      background: #38bdf8;
+      color: #0f172a;
+      font-weight: 900;
+      font-size: 16px;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+      border-color: #7dd3fc;
+      transform: scale(1.05);
+    }
+
+    /* PLAYER CARD VIEW */
+    .player-wrap {
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .player-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(30, 41, 59, 0.8);
+      padding: 14px 20px;
+      border-radius: 16px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .bingo-card {
+      background: #1e293b;
+      border: 4px solid #0284c7;
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+    }
+
+    .card-header-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .c-head {
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Fredoka', cursive;
+      font-size: 30px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .card-body-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .p-cell {
+      aspect-ratio: 1;
+      background: #0f172a;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Fredoka', cursive;
+      font-size: 28px;
+      font-weight: 700;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s ease;
+    }
+
+    .p-cell:hover {
+      border-color: #38bdf8;
+      background: #1e293b;
+    }
+
+    .p-cell.marked {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      border-color: #60a5fa;
+      color: transparent;
+      transform: scale(0.96);
+    }
+
+    .p-cell.marked::after {
+      content: "✓";
+      position: absolute;
+      font-size: 36px;
+      color: #fde047;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 900;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+
+    .p-cell.free-star {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #fff;
+      font-size: 20px;
+      border-color: #fbbf24;
+    }
+
+    /* PRINT SECTION */
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+      }
+      header, .host-layout, .tab-group, .player-wrap {
+        display: none !important;
+      }
+      #printArea {
+        display: block !important;
+      }
+      .page-break {
+        page-break-after: always;
+      }
+      .print-sheet {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        padding: 20px 0;
+      }
+      .pr-card {
+        border: 2px solid #000;
+        border-radius: 12px;
+        padding: 12px;
+      }
+      .pr-title {
+        text-align: center;
+        font-family: 'Times New Roman', serif;
+        font-size: 16pt;
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+      .pr-grid-head {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        text-align: center;
+        font-weight: bold;
+        font-size: 18pt;
+        border: 1px solid #000;
+        background: #eee;
+      }
+      .pr-grid-body {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        border-left: 1px solid #000;
+        border-top: 1px solid #000;
+      }
+      .pr-cell {
+        aspect-ratio: 1;
+        border-right: 1px solid #000;
+        border-bottom: 1px solid #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Times New Roman', serif;
+        font-size: 18pt;
+        font-weight: bold;
+      }
+    }
+
+    #printArea {
+      display: none;
+    }
+
+    /* CONFETTI CANVAS */
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="confettiCanvas"></canvas>
+
+  <header>
+    <div class="brand">
+      <div class="bingo-letters">
+        <div class="b-letter b-b">B</div>
+        <div class="b-letter b-i">I</div>
+        <div class="b-letter b-n">N</div>
+        <div class="b-letter b-g">G</div>
+        <div class="b-letter b-o">O</div>
+      </div>
+      <div>
+        <div class="brand-title">ENGLISH NUMBER BINGO ARENA</div>
+        <div style="font-size:12px; color:#94a3b8; font-weight:700;">Luyện Nghe Số Tiếng Anh Chuẩn (1 - 75)</div>
+      </div>
+    </div>
+
+    <div class="tab-group">
+      <button class="tab-btn active" id="tabHost" onclick="switchTab('host')">
+        <span>🎰 Lồng Quay Chiếu Lớp</span>
+      </button>
+      <button class="tab-btn" id="tabPlayer" onclick="switchTab('player')">
+        <span>📱 Thẻ Học Viên (5x5)</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- VIEW 1: LỒNG QUAY DÀNH CHO GIÁO VIÊN CHIẾU LÊN BẢNG -->
+    <section id="hostView" class="view-section active">
+      <div class="host-layout">
+        
+        <!-- CỘT TRÁI: BÓNG SỐ TRUNG TÂM -->
+        <div class="caller-panel">
+          <div style="font-size: 15px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">
+            Số Vừa Được Bốc
+          </div>
+
+          <div class="ball-display" id="ballDisplay">
+            <div class="ball-letter" id="ballLetter">-</div>
+            <div class="ball-number" id="ballNumber">--</div>
+          </div>
+
+          <button class="control-btn btn-call" id="btnCall" onclick="callNextNumber()">
+            🎲 Bốc Số Tiếp Theo
+          </button>
+
+          <button class="control-btn btn-speak" id="btnSpeak" onclick="speakCurrentNumber()">
+            🔊 Phát Âm Lại (English)
+          </button>
+
+          <div style="display:flex; gap:10px; width:100%; margin-top:8px;">
+            <button class="control-btn btn-secondary" onclick="printNumbersBatch()">
+              🖨️ In Thẻ Giấy A4
+            </button>
+            <button class="control-btn btn-secondary" onclick="resetHostCaller()">
+              🔄 Ván Mới
+            </button>
+          </div>
+
+          <div style="margin-top: 14px; font-size: 14px; color: #38bdf8; font-weight: 800;" id="callCounter">
+            Đã gọi: 0 / 75 số
+          </div>
+        </div>
+
+        <!-- CỘT PHẢI: BẢNG MASTER 75 SỐ -->
+        <div class="board-panel">
+          <div class="board-header">
+            <div style="font-size: 18px; font-weight: 900; color: #f8fafc;">BẢNG ĐỐI CHIẾU SỐ (MASTER BOARD)</div>
+            <div style="font-size: 13px; color: #94a3b8; font-weight: 700;">Học sinh báo Bingo thì đối chiếu tại đây nhé!</div>
+          </div>
+
+          <div class="board-rows" id="masterBoardRows"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- VIEW 2: THẺ BINGO TƯƠNG TÁC CHO HỌC VIÊN -->
+    <section id="playerView" class="view-section">
+      <div class="player-wrap">
+        <div class="player-topbar">
+          <div>
+            <span style="font-weight: 800; color: #94a3b8;">Đường Bingo: </span>
+            <span id="playerLines" style="font-size: 26px; font-weight: 900; color: #f59e0b;">0</span>
+          </div>
+          <button class="control-btn btn-secondary" style="width:auto; padding:8px 16px; margin:0;" onclick="generatePlayerCard()">
+            🎲 Đổi Thẻ Khác
+          </button>
+        </div>
+
+        <div class="bingo-card">
+          <div class="card-header-grid">
+            <div class="c-head b-b">B</div>
+            <div class="c-head b-i">I</div>
+            <div class="c-head b-n">N</div>
+            <div class="c-head b-g">G</div>
+            <div class="c-head b-o">O</div>
+          </div>
+          <div class="card-body-grid" id="playerGrid"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- KHU VỰC IN PHIẾU BATCH A4 -->
+  <div id="printArea"></div>
+
+  <script>
+    // --- KHỞI TẠO BỘ 75 SỐ ---
+    // B: 1-15 | I: 16-30 | N: 31-45 | G: 46-60 | O: 61-75
+    function getLetterForNumber(num) {
+      if (num <= 15) return { letter: 'B', class: 'b' };
+      if (num <= 30) return { letter: 'I', class: 'i' };
+      if (num <= 45) return { letter: 'N', class: 'n' };
+      if (num <= 60) return { letter: 'G', class: 'g' };
+      return { letter: 'O', class: 'o' };
+    }
+
+    let availablePool = [];
+    let calledNumbers = [];
+    let currentCall = null;
+    let isSpinning = false;
+
+    // Web Audio Tổng Hợp Âm Thanh
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep(freq, type = 'sine', duration = 0.1) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playBingoFanfare() {
+      const notes = [523.25, 659.25, 783.99, 1046.5];
+      notes.forEach((freq, idx) => {
+        setTimeout(() => playBeep(freq, 'triangle', 0.25), idx * 140);
+      });
+    }
+
+    // KHỞI TẠO HOST BOARD
+    function initHost() {
+      availablePool = Array.from({ length: 75 }, (_, i) => i + 1);
+      calledNumbers = [];
+      currentCall = null;
+      document.getElementById("callCounter").innerText = "Đã gọi: 0 / 75 số";
+      document.getElementById("ballLetter").innerText = "-";
+      document.getElementById("ballNumber").innerText = "--";
+      document.getElementById("ballLetter").className = "ball-letter";
+
+      const rowsContainer = document.getElementById("masterBoardRows");
+      rowsContainer.innerHTML = "";
+
+      const ranges = [
+        { letter: 'B', color: 'b-b', start: 1, end: 15 },
+        { letter: 'I', color: 'b-i', start: 16, end: 30 },
+        { letter: 'N', color: 'b-n', start: 31, end: 45 },
+        { letter: 'G', color: 'b-g', start: 46, end: 60 },
+        { letter: 'O', color: 'b-o', start: 61, end: 75 },
+      ];
+
+      ranges.forEach(r => {
+        const rowDiv = document.createElement("div");
+        rowDiv.className = "letter-row";
+
+        const badge = document.createElement("div");
+        badge.className = `row-badge ${r.color}`;
+        badge.innerText = r.letter;
+        rowDiv.appendChild(badge);
+
+        const numsGrid = document.createElement("div");
+        numsGrid.className = "row-numbers";
+
+        for (let n = r.start; n <= r.end; n++) {
+          const slot = document.createElement("div");
+          slot.className = "num-slot";
+          slot.id = `slot-${n}`;
+          slot.innerText = n;
+          numsGrid.appendChild(slot);
+        }
+
+        rowDiv.appendChild(numsGrid);
+        rowsContainer.appendChild(rowDiv);
+      });
+    }
+
+    // BỐC SỐ TIẾP THEO
+    function callNextNumber() {
+      if (isSpinning || availablePool.length === 0) return;
+      isSpinning = true;
+      document.getElementById("btnCall").disabled = true;
+
+      const ballEl = document.getElementById("ballDisplay");
+      ballEl.classList.add("spinning");
+
+      // Giả lập quay số trong 1.2 giây
+      let spinCount = 0;
+      const spinInterval = setInterval(() => {
+        playBeep(350 + Math.random() * 200, 'square', 0.05);
+        const randomTemp = availablePool[Math.floor(Math.random() * availablePool.length)];
+        const info = getLetterForNumber(randomTemp);
+        document.getElementById("ballLetter").innerText = info.letter;
+        document.getElementById("ballNumber").innerText = randomTemp;
+        spinCount++;
+
+        if (spinCount > 10) {
+          clearInterval(spinInterval);
+          finalizeCall();
+        }
+      }, 90);
+    }
+
+    function finalizeCall() {
+      // Bốc số thực sự
+      const pickedIndex = Math.floor(Math.random() * availablePool.length);
+      const pickedNumber = availablePool.splice(pickedIndex, 1)[0];
+      calledNumbers.push(pickedNumber);
+      currentCall = pickedNumber;
+
+      const info = getLetterForNumber(pickedNumber);
+
+      const ballEl = document.getElementById("ballDisplay");
+      ballEl.classList.remove("spinning");
+
+      const letterEl = document.getElementById("ballLetter");
+      letterEl.innerText = info.letter;
+      letterEl.className = `ball-letter ${info.class}`;
+
+      document.getElementById("ballNumber").innerText = pickedNumber;
+
+      // Đánh dấu trên Master Board
+      const slot = document.getElementById(`slot-${pickedNumber}`);
+      if (slot) slot.classList.add("called");
+
+      document.getElementById("callCounter").innerText = `Đã gọi: ${calledNumbers.length} / 75 số`;
+      document.getElementById("btnCall").disabled = false;
+      isSpinning = false;
+
+      // Phát âm chuẩn tiếng Anh
+      speakCurrentNumber();
+    }
+
+    // PHÁT ÂM TIẾNG ANH (SPEECH SYNTHESIS)
+    function speakCurrentNumber() {
+      if (!currentCall || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const info = getLetterForNumber(currentCall);
+      const text = `${info.letter}... ${currentCall}`;
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'en-US';
+      utter.rate = 0.85;
+      window.speechSynthesis.speak(utter);
+    }
+
+    function resetHostCaller() {
+      if (confirm("Em có chắc muốn làm mới lại lồng quay và bảng số không?")) {
+        initHost();
+      }
+    }
+
+    // --- THẺ HỌC VIÊN (PLAYER CARD 5x5) ---
+    let playerCardData = [];
+    let playerMarks = Array(25).fill(false);
+
+    function getRandomSubarray(arr, size) {
+      const shuffled = [...arr].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, size);
+    }
+
+    function generatePlayerCard() {
+      // 5 số cho B (1-15), 5 số cho I (16-30), 4 số cho N (31-45), 5 số cho G (46-60), 5 số cho O (61-75)
+      const bCol = getRandomSubarray(Array.from({length: 15}, (_, i) => i + 1), 5);
+      const iCol = getRandomSubarray(Array.from({length: 15}, (_, i) => i + 16), 5);
+      const nCol = getRandomSubarray(Array.from({length: 15}, (_, i) => i + 31), 4);
+      const gCol = getRandomSubarray(Array.from({length: 15}, (_, i) => i + 46), 5);
+      const oCol = getRandomSubarray(Array.from({length: 15}, (_, i) => i + 61), 5);
+
+      playerCardData = [];
+      playerMarks = Array(25).fill(false);
+      playerMarks[12] = true; // Ô FREE STAR giữa luôn được tích
+
+      for (let row = 0; row < 5; row++) {
+        playerCardData.push(bCol[row]);
+        playerCardData.push(iCol[row]);
+        if (row === 2) {
+          playerCardData.push("⭐ FREE"); // Ô giữa
+        } else {
+          playerCardData.push(nCol[row > 2 ? row - 1 : row]);
+        }
+        playerCardData.push(gCol[row]);
+        playerCardData.push(oCol[row]);
+      }
+
+      renderPlayerGrid();
+      checkBingo();
+    }
+
+    function renderPlayerGrid() {
+      const grid = document.getElementById("playerGrid");
+      grid.innerHTML = "";
+
+      playerCardData.forEach((val, index) => {
+        const cell = document.createElement("div");
+        cell.className = "p-cell";
+        if (index === 12) {
+          cell.classList.add("free-star");
+          cell.innerText = "⭐";
+        } else {
+          cell.innerText = val;
+          if (playerMarks[index]) cell.classList.add("marked");
+          cell.onclick = () => togglePlayerCell(index);
+        }
+        grid.appendChild(cell);
+      });
+    }
+
+    function togglePlayerCell(index) {
+      if (index === 12) return;
+      playerMarks[index] = !playerMarks[index];
+      playBeep(playerMarks[index] ? 600 : 300, 'square', 0.08);
+      renderPlayerGrid();
+      checkBingo();
+    }
+
+    function checkBingo() {
+      let lines = 0;
+      // 5 Hàng ngang
+      for (let r = 0; r < 5; r++) {
+        if (playerMarks[r*5] && playerMarks[r*5+1] && playerMarks[r*5+2] && playerMarks[r*5+3] && playerMarks[r*5+4]) lines++;
+      }
+      // 5 Hàng dọc
+      for (let c = 0; c < 5; c++) {
+        if (playerMarks[c] && playerMarks[c+5] && playerMarks[c+10] && playerMarks[c+15] && playerMarks[c+20]) lines++;
+      }
+      // 2 Chéo
+      if (playerMarks[0] && playerMarks[6] && playerMarks[12] && playerMarks[18] && playerMarks[24]) lines++;
+      if (playerMarks[4] && playerMarks[8] && playerMarks[12] && playerMarks[16] && playerMarks[20]) lines++;
+
+      const prevLines = parseInt(document.getElementById("playerLines").innerText) || 0;
+      document.getElementById("playerLines").innerText = lines;
+
+      if (lines > prevLines) {
+        playBingoFanfare();
+        triggerConfetti();
+      }
+    }
+
+    // HIỆU ỨNG PHÁO HOA ĂN MỪNG BINGO (VANILLA JS)
+    function triggerConfetti() {
+      const canvas = document.getElementById("confettiCanvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#ef4444', '#f59e0b', '#10b981', '#38bdf8', '#8b5cf6', '#ec4899'];
+
+      for (let i = 0; i < 120; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          r: Math.random() * 6 + 4,
+          dx: (Math.random() - 0.5) * 16,
+          dy: (Math.random() - 0.5) * 16 - 3,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 10,
+          tiltAngle: 0,
+          tiltAngleInc: Math.random() * 0.1 + 0.05
+        });
+      }
+
+      let frame = 0;
+      function anim() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.x += p.dx;
+          p.y += p.dy;
+          p.dy += 0.2; // Trọng lực
+          p.tiltAngle += p.tiltAngleInc;
+          p.tilt = Math.sin(p.tiltAngle) * 12;
+
+          ctx.beginPath();
+          ctx.lineWidth = p.r;
+          ctx.strokeStyle = p.color;
+          ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+          ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+          ctx.stroke();
+        });
+
+        frame++;
+        if (frame < 140) requestAnimationFrame(anim);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      anim();
+    }
+
+    // IN THẺ BINGO SỐ RA GIẤY A4
+    function printNumbersBatch() {
+      const printArea = document.getElementById("printArea");
+      printArea.innerHTML = "";
+
+      // Tạo 4 thẻ/trang A4 (tổng cộng 2 trang = 8 thẻ)
+      let sheetDiv = null;
+      for (let c = 1; c <= 8; c++) {
+        if (c % 4 === 1) {
+          sheetDiv = document.createElement("div");
+          sheetDiv.className = "print-sheet " + (c > 1 ? "page-break" : "");
+          printArea.appendChild(sheetDiv);
+        }
+
+        const bCol = getRandomSubarray(Array.from({length: 15}, (_, i) => i + 1), 5);
+        const iCol = getRandomSubarray(Array.from({length: 15}, (_, i) => i + 16), 5);
+        const nCol = getRandomSubarray(Array.from({length: 15}, (_, i) => i + 31), 4);
+        const gCol = getRandomSubarray(Array.from({length: 15}, (_, i) => i + 46), 5);
+        const oCol = getRandomSubarray(Array.from({length: 15}, (_, i) => i + 61), 5);
+
+        let cellsHtml = "";
+        for (let r = 0; r < 5; r++) {
+          cellsHtml += `<div class="pr-cell">${bCol[r]}</div>`;
+          cellsHtml += `<div class="pr-cell">${iCol[r]}</div>`;
+          if (r === 2) cellsHtml += `<div class="pr-cell" style="background:#ddd;">FREE</div>`;
+          else cellsHtml += `<div class="pr-cell">${nCol[r > 2 ? r - 1 : r]}</div>`;
+          cellsHtml += `<div class="pr-cell">${gCol[r]}</div>`;
+          cellsHtml += `<div class="pr-cell">${oCol[r]}</div>`;
+        }
+
+        const cardBox = document.createElement("div");
+        cardBox.className = "pr-card";
+        cardBox.innerHTML = `
+          <div class="pr-title">ENGLISH NUMBER BINGO #${c}</div>
+          <div class="pr-grid-head">
+            <div>B</div><div>I</div><div>N</div><div>G</div><div>O</div>
+          </div>
+          <div class="pr-grid-body">
+            ${cellsHtml}
+          </div>
+        `;
+        sheetDiv.appendChild(cardBox);
+      }
+
+      window.print();
+    }
+
+    // CHUYỂN TAB
+    function switchTab(mode) {
+      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+      document.querySelectorAll(".view-section").forEach(sec => sec.classList.remove("active"));
+
+      if (mode === 'host') {
+        document.getElementById("tabHost").classList.add("active");
+        document.getElementById("hostView").classList.add("active");
+      } else {
+        document.getElementById("tabPlayer").classList.add("active");
+        document.getElementById("playerView").classList.add("active");
+        if (playerCardData.length === 0) generatePlayerCard();
+      }
+    }
+
+    window.onload = () => {
+      initHost();
+      generatePlayerCard();
+    };
+  </script>
+</body>
+</html>
